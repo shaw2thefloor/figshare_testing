@@ -1,0 +1,54 @@
+__author__ = 'felix.shaw@tgac.ac.uk - 27/04/15'
+from urllib.parse import parse_qs
+
+import requests
+from requests_oauthlib import OAuth1
+from requests_oauthlib import OAuth1Session
+
+
+def get_credentials():
+    client_key = 'id6JBVVeItadGDmjRUDljg'
+    client_secret = 'BC2tEMeCAT3veHhzfd2xIA'
+
+    resource_owner_key = 'iJolWsZeBNm2Ti6qYya2VAWcr25Bn7tbnnnQ9sKOLh5AiJolWsZeBNm2Ti6qYya2VA'
+    resource_owner_secret = 'FsAxj0BhtsoMiFYNk0lUUA'
+
+    # TODO - here we put check logic to see if user has granted COPO access to the figshare account
+    if (resource_owner_key == '' or resource_owner_secret == ''):
+        request_token_url = 'http://api.figshare.com/v1/pbl/oauth/request_token'
+        authorization_url = 'http://api.figshare.com/v1/pbl/oauth/authorize'
+        access_token_url = 'http://api.figshare.com/v1/pbl/oauth/access_token'
+
+        #Obtain request token
+        oauth = OAuth1Session(client_key, client_secret=client_secret)
+        fetch_response = oauth.fetch_request_token(request_token_url)
+        resource_owner_key = fetch_response.get('oauth_token')
+        resource_owner_secret = fetch_response.get('oauth_token_secret')
+
+        #Obtain Authorize Token
+        authorize_url = authorization_url + '?oauth_token='
+        authorize_url = authorize_url + resource_owner_key
+        print('Please go here and authorize: ', authorize_url)
+        redirect_response = input('Please input the verifier: ')
+        oauth_response = oauth.parse_authorization_response(redirect_response)
+        verifier = oauth_response.get('oauth_verifier')
+
+        #Obtain Access Token
+        oauth = OAuth1(client_key,
+                       client_secret=client_secret,
+                       resource_owner_key=resource_owner_key,
+                       resource_owner_secret=resource_owner_secret,
+                       verifier=verifier)
+
+        r = requests.post(url=access_token_url, auth=oauth)
+        r.content
+        credentials = parse_qs(r.content)
+        resource_owner_key = credentials[b'oauth_token'][0].decode("utf-8")
+        resource_owner_secret = credentials[b'oauth_token_secret'][0].decode("utf-8")
+
+    return OAuth1(client_key,
+                  client_secret=client_secret,
+                  resource_owner_key=resource_owner_key,
+                  resource_owner_secret=resource_owner_secret,
+                  signature_type='auth_header')
+
