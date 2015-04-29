@@ -10,8 +10,8 @@ def get_credentials():
     client_key = 'id6JBVVeItadGDmjRUDljg'
     client_secret = 'BC2tEMeCAT3veHhzfd2xIA'
 
-    resource_owner_key = 'iJolWsZeBNm2Ti6qYya2VAWcr25Bn7tbnnnQ9sKOLh5AiJolWsZeBNm2Ti6qYya2VA'
-    resource_owner_secret = 'FsAxj0BhtsoMiFYNk0lUUA'
+    resource_owner_key = 'BskboZgzVXwcwX9xgv7puwkvKqJev8yklxzg55AaFKDwXskboZgzVXwcwX9xgv7puw'
+    resource_owner_secret = 'eBp6Hc0JhynZSPtGDGFRTw'
 
     # TODO - here we put check logic to see if user has granted COPO access to the figshare account
     if (resource_owner_key == '' or resource_owner_secret == ''):
@@ -41,10 +41,12 @@ def get_credentials():
                        verifier=verifier)
 
         r = requests.post(url=access_token_url, auth=oauth)
-        r.content
         credentials = parse_qs(r.content)
         resource_owner_key = credentials[b'oauth_token'][0].decode("utf-8")
         resource_owner_secret = credentials[b'oauth_token_secret'][0].decode("utf-8")
+
+        print(resource_owner_key)
+        print(resource_owner_secret)
 
     return OAuth1(client_key,
                   client_secret=client_secret,
